@@ -3,11 +3,11 @@ package com.kovospace.musicpagesscraper.repositories.cache.bands;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.PrePersist;
 import java.time.LocalDateTime;
 
@@ -24,7 +24,9 @@ public class BandsCacheEntity {
     private int page;
     private String platform;
 
-    @Lob
+    // NOT @Lob - on PostgreSQL that maps to an oid large object, which cannot be
+    // read outside a transaction; the cachers deliberately run without @Transactional
+    @Column(columnDefinition = "text")
     private String json;
 
     private LocalDateTime updateTime;
