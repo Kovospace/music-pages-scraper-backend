@@ -1,13 +1,15 @@
 package com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org;
 
-import com.kovospace.musicpagesscraper.helpers.MD5helper;
-import com.kovospace.musicpagesscraper.helpers.UrlHelper;
-import com.kovospace.musicpagesscraper.helpers.VocabularyHelper;
-import com.kovospace.musicpagesscraper.models.ScraperItemInterface;
-import com.kovospace.musicpagesscraper.models.TrackInterface;
-import com.kovospace.musicpagesscraper.scrapers.BandScraper;
+import com.kovospace.musicpagesscraper.interfaces.Track;
+import com.kovospace.musicpagesscraper.scrapers.BandScraperImpl;
+import com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org.interfaces.FreeTeknoMusicItem;
+import com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org.interfaces.FreeTeknoMusicTrack;
+import com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org.utils.FreeTeknoMusicScraper;
+import com.kovospace.musicpagesscraper.utils.MD5Util;
+import com.kovospace.musicpagesscraper.utils.UrlUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -15,12 +17,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-public class FreeTeknoMusicBandScraper extends BandScraper {
+public  class FreeTeknoMusicBandScraper
+        extends BandScraperImpl
+{
     private final static String URL = "http://archive.freeteknomusic.org/";
     private static final String MP3_URL = "http://freeteknomusic.org/mp3/" ;
     private static final Pattern albumPattern = Pattern.compile("([^\\/]+)\\/[^\\/]+\\.mp3$");
     private String slug;
-    private List<ScraperItemInterface> items;
+    private List<FreeTeknoMusicItem> items;
 
     @Autowired
     private FreeTeknoMusicScraper scraper;
@@ -40,8 +44,8 @@ public class FreeTeknoMusicBandScraper extends BandScraper {
     }
 
     @Override
-    public String platformSlug() {
-        return "freetekno";
+    public String getPlatform() {
+        return "freeteknomusic";
     }
 
     @Override
@@ -54,70 +58,42 @@ public class FreeTeknoMusicBandScraper extends BandScraper {
     public void init() {}
 
     @Override
-    public String title() {
+    public String getTitle() {
         return slug;
     }
 
     @Override
-    public String imageUrl() {
-        return null;
+    public String getSlug() {
+        return this.slug;
     }
 
     @Override
-    public String href() {
-        return URL + slug;
-    }
-
-    @Override
-    public String genre() {
-        return null;
-    }
-
-    @Override
-    public String city() {
-        return null;
-    }
-
-    @Override
-    public List<TrackInterface> tracks() {
+    public List<Track> getTracks() {
         return items
             .stream()
-            .map(item -> new TrackInterface() {
-                @Override
-                public String getAlbum() {
+            .map(item -> new FreeTeknoMusicTrack() {
+                @Override public String getAlbumTitle() {
                     String album;
-                    String part = UrlHelper.decode(item.getHref())
+                    String part = UrlUtil.decode(item.getHref())
                         .replace(MP3_URL + slug + "/", "");
                     Matcher matcher = albumPattern.matcher(part);
                     if (matcher.find()) {
                         album = matcher.group(1);
                     } else {
-                        album = VocabularyHelper.noAlbum;
+                        album = "Nezaradené";
                     }
                     return album;
                 }
-                @Override
-                public String getPlaysCount() {
-                    return null;
+                @Override public String getHrefHash() {
+                    return MD5Util.hash(item.getHref());
                 }
-                @Override
-                public String getHrefHash() {
-                    return MD5helper.hash(item.getHref());
-                }
-                @Override
-                public String getDuration() {
-                    return null;
-                }
-                @Override
-                public String getTitle() {
+                @Override public String getTitle() {
                     return item.getTitle();
                 }
-                @Override
-                public String getHref() {
+                @Override public String getHref() {
                     return item.getHref();
                 }
-                @Override
-                public String getSlug() {
+                @Override public String getSlugRef() {
                     return item.getSlug();
                 }
             })

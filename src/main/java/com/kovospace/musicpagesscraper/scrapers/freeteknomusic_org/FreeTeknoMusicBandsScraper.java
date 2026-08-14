@@ -1,24 +1,28 @@
 package com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org;
 
-import com.kovospace.musicpagesscraper.models.BandInterface;
-import com.kovospace.musicpagesscraper.models.ScraperItemInterface;
-import com.kovospace.musicpagesscraper.models.TrackInterface;
-import com.kovospace.musicpagesscraper.scrapers.BandsScraper;
+import com.kovospace.musicpagesscraper.interfaces.Track;
+import com.kovospace.musicpagesscraper.scrapers.BandsScraperImpl;
+import com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org.interfaces.FreeTeknoMusicBand;
+import com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org.interfaces.FreeTeknoMusicItem;
+import com.kovospace.musicpagesscraper.scrapers.freeteknomusic_org.utils.FreeTeknoMusicScraper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-public class FreeTeknoMusicBandsScraper extends BandsScraper {
+public  class FreeTeknoMusicBandsScraper
+        extends BandsScraperImpl
+{
     private static final int ITEMS_PER_PAGE = 20;
     private static final String URL = "http://archive.freeteknomusic.org/";
     private String searchedBand;
     private int pageNum;
-    private List<ScraperItemInterface> allBands;
-    private List<BandInterface> bands;
+    private List<FreeTeknoMusicItem> allBands;
+    private List<FreeTeknoMusicBand> bands;
 
     @Autowired
     private FreeTeknoMusicScraper scraper;
@@ -26,44 +30,46 @@ public class FreeTeknoMusicBandsScraper extends BandsScraper {
     public FreeTeknoMusicBandsScraper() {
         super();
         allBands = new ArrayList<>();
+        bands = new ArrayList<>();
     }
 
     @Override
-    public String requestUrl(String searchedBand, String pageNum) {
+    public String requestUrl(String searchedBand, int pageNum) {
         this.searchedBand = searchedBand;
-        this.pageNum = Integer.parseInt(pageNum);
+        this.pageNum = pageNum;
         return URL;
     }
 
     @Override
     public void init() {
-        scraper.setExcludePattern(Pattern.compile("^\\?C\\=\\w\\;|http\\:\\/\\/"));
-        allBands = scraper.scrape(document, searchedBand, URL);
+      bands.clear();
+      scraper.setExcludePattern(Pattern.compile("^\\?C\\=\\w\\;|http\\:\\/\\/"));
+      allBands = scraper.scrape(document, searchedBand, URL);
     }
 
     @Override
-    public int pageNum() {
+    public int getCurrentPageNum() {
         return this.pageNum;
     }
 
     @Override
-    public int pageItemsCount() {
-        return bands.size();
+    public int getCurrentPageItemsCount() {
+      return bands.size();
     }
 
     @Override
-    public int pagesCount() {
+    public int getPagesCount() {
         return (allBands.size() % ITEMS_PER_PAGE) == 0 ? (allBands.size() / ITEMS_PER_PAGE) : ((allBands.size() / ITEMS_PER_PAGE) + 1) ;
     }
 
     @Override
-    public int totalItemsCount() {
+    public int getTotalItemsCount() {
         return allBands.size();
     }
 
     @Override
-    public List<BandInterface> bands() {
-        if (this.pageNum <= pagesCount()) {
+    public List<FreeTeknoMusicBand> getBands() {
+        if (this.pageNum <= getPagesCount()) {
             int start = (pageNum - 1) * ITEMS_PER_PAGE;
             int end;
             if (start + ITEMS_PER_PAGE > allBands.size()) {
@@ -74,33 +80,20 @@ public class FreeTeknoMusicBandsScraper extends BandsScraper {
             bands = allBands
                 .subList(start, end)
                 .stream()
-                .map(item -> new BandInterface() {
+                .map(item -> new FreeTeknoMusicBand() {
                     @Override
-                    public String getImageUrl() {
-                        return null;
-                    }
+                    public String getPlatform() { return "freeteknomusic"; }
                     @Override
-                    public String getGenre() {
-                        return null;
-                    }
-                    @Override
-                    public String getCity() {
-                        return null;
-                    }
-                    @Override
-                    public String getPlatform() { return "freetekno"; }
-                    @Override
-                    public List<TrackInterface> getTracks() { return null; }
+                    public List<Track> getTracks() { return null; }
                     @Override
                     public String getTitle() { return item.getTitle(); }
-                    @Override
-                    public String getHref() { return item.getHref(); }
                     @Override
                     public String getSlug() { return item.getSlug(); }
                 })
                 .collect(Collectors.toList());
             return bands;
         }
-        return new ArrayList<BandInterface>();
+        return new ArrayList<>();
     }
+
 }
