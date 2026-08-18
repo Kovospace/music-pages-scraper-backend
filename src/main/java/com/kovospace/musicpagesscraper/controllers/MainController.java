@@ -1,5 +1,6 @@
 package com.kovospace.musicpagesscraper.controllers;
 
+import com.kovospace.musicpagesscraper.annotations.Compatibility;
 import com.kovospace.musicpagesscraper.dtos.ErrorResponseDTO;
 import com.kovospace.musicpagesscraper.exceptions.FactoryException;
 import com.kovospace.musicpagesscraper.exceptions.PageException;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +28,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@Tag(name = "Scraper", description = "Querying bands, band profiles and supported platforms")
+// API version lives in the first path segment, so every endpoint of v1 is reachable under /v1/**.
+// A future v2 gets its own controller with @RequestMapping("/v2") and can re-implement only the
+// endpoints that actually break; the rest keep being served from here.
+@RequestMapping("/v1")
+@Tag(name = "Scraper v1", description = "Querying bands, band profiles and supported platforms")
 public class MainController {
 
   private BandsService bandsService;
@@ -62,6 +68,7 @@ public class MainController {
     @ApiResponse(responseCode = "503", description = "No scraper service available for the platform",
       content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
   })
+  @Compatibility(since = "v1")
   @GetMapping(value = "/{s}/bands", produces = "application/json;charset=utf-8")
   public Bands getBands(
     @Parameter(description = "Band name to search for. Empty means the platform's default listing.",
@@ -92,6 +99,7 @@ public class MainController {
     @ApiResponse(responseCode = "400", description = "Wrong type of an input parameter",
       content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
   })
+  @Compatibility(since = "v1")
   @GetMapping(value = "/bands", produces = "application/json;charset=utf-8")
   // foo=value1&foo=value2&foo=value3
   public Bands getBands(
@@ -128,6 +136,7 @@ public class MainController {
     @ApiResponse(responseCode = "503", description = "No scraper service available for the platform",
       content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
   })
+  @Compatibility(since = "v1")
   @GetMapping(value = "/{s}/band", produces = "application/json;charset=utf-8")
   public Band getBand(
     @Parameter(description = "Band slug, taken from a bands listing.", required = true,
@@ -146,6 +155,7 @@ public class MainController {
     description = "Returns every platform the API can scrape, with the slug to use in the other endpoints."
   )
   @ApiResponse(responseCode = "200", description = "List of supported platforms")
+  @Compatibility(since = "v1")
   @GetMapping(value = "/platforms", produces = "application/json;charset=utf-8")
   public Platforms getPlatforms(
     @Parameter(description = "Unused, kept for signature compatibility with the paged endpoints.",
