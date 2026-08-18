@@ -66,3 +66,6 @@ extra ones of their own (bandzone for instance adds `imageUrl`, `genre` and `cit
 | 08.jan.2022 | fix due to changes in bandzone webpage |
 | 09.jan.2022 | refactor of some concepts of app, null pointer safety precautions |
 | 29.jan.2022 | documentation |
+| 14.aug.2026 | migration to Postgres |
+| 18.aug.2026 | Swagger UI, api version moved into the path prefix, compatibility annotation, claude.md, AI agents |
+| 19.aug.2026 | v2 band endpoint sending track durations - neither the page nor its player publishes them, so they are read out of the mp3 itself and cached |

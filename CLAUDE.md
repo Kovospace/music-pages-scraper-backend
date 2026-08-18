@@ -88,8 +88,10 @@ Note the package is spelled `cahcers` (typo, load-bearing in imports — leave i
 
 ## API surface
 
-Four `GET` endpoints, all in `MainController`: `/v1/{s}/bands`, `/v1/bands`, `/v1/{s}/band`,
-`/v1/platforms`.
+Four `GET` endpoints in `MainController`: `/v1/{s}/bands`, `/v1/bands`, `/v1/{s}/band`,
+`/v1/platforms`. `MainControllerV2` adds one more, `/v2/{s}/band` — the v1 payload plus a nullable
+`durationMs` per track. It is the worked example of the per-endpoint versioning described below:
+v1 keeps serving the other three untouched.
 `/bands` swallows per-platform failures and merges what succeeded, so it answers 200 even when a
 platform is down; the single-platform endpoints propagate the error.
 

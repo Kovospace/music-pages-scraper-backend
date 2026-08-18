@@ -32,10 +32,13 @@ dependencies {
     // libs
     implementation 'org.modelmapper:modelmapper:2.4.0'
     implementation 'com.google.code.gson:gson:2.8.9'
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testCompileOnly 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    // Build-time only (never ends up in the jar), so this is free to track the JDK doing the
+    // building - 1.18.22 cannot run its annotation processor on anything past JDK 17. The
+    // emitted bytecode level is decided by sourceCompatibility above, not by this.
+    compileOnly 'org.projectlombok:lombok:1.18.46'
+    annotationProcessor 'org.projectlombok:lombok:1.18.46'
+    testCompileOnly 'org.projectlombok:lombok:1.18.46'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.46'
 }
 
 test {
