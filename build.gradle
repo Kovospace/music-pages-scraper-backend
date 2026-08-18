@@ -27,6 +27,8 @@ dependencies {
     runtimeOnly 'com.h2database:h2:1.4.200'
     //flyway
     implementation 'org.flywaydb:flyway-core'
+    // OpenAPI 3 spec + Swagger UI; 1.6.x is the last springdoc line built for Java 8
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
     // libs
     implementation 'org.modelmapper:modelmapper:2.4.0'
     implementation 'com.google.code.gson:gson:2.8.9'
