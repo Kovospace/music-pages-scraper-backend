@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,9 @@ import java.net.URL;
  *   <li><b>VBR header</b> — most files start with a Xing/Info/VBRI header holding the exact frame
  *       count. It sits in the first frame, so a small range request answers the question outright.
  *   <li><b>Frame count</b> — files without that header (bandzone has whole albums of them) have to
- *       be walked frame by frame. Only these pay for a full download.
+ *       be walked frame by frame. Only these pay for a full download, and even then the bytes are
+ *       counted as they arrive and thrown away: nothing is written to disk and no more than a few
+ *       kilobytes of any track is ever held in memory.
  * </ol>
  *
  * <p>Estimating from the first frame's bitrate — what a naive player does — is not an option here:
@@ -49,7 +52,7 @@ public class Mp3DurationReader {
    */
   public Long read(String url) {
     try {
-      byte[] probe = download(url, HEADER_PROBE_BYTES);
+      byte[] probe = probe(url, HEADER_PROBE_BYTES);
       if (probe == null || probe.length == 0) {
         return null;
       }
@@ -57,34 +60,33 @@ public class Mp3DurationReader {
       if (fromHeader != null) {
         return fromHeader;
       }
-      byte[] whole = download(url, -1);
-      if (whole == null) {
-        return null;
-      }
-      return byCountingFrames(whole);
+      return byCountingFrames(url, audioStart(probe));
     } catch (Exception e) {
       log.warn("Could not read duration of {}: {}", url, e.toString());
       return null;
     }
   }
 
-  private byte[] download(String url, int maxBytes) throws IOException {
+  private HttpURLConnection open(String url) throws IOException {
     HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
     conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
     conn.setReadTimeout(READ_TIMEOUT_MS);
     conn.setInstanceFollowRedirects(true);
     conn.setRequestProperty("User-Agent", "music-pages-scraper");
-    if (maxBytes > 0) {
-      conn.setRequestProperty("Range", "bytes=0-" + (maxBytes - 1));
-    }
+    return conn;
+  }
+
+  /** The opening bytes only - enough for an ID3v2 tag and the first frame's VBR header. */
+  private byte[] probe(String url, int maxBytes) throws IOException {
+    HttpURLConnection conn = open(url);
+    conn.setRequestProperty("Range", "bytes=0-" + (maxBytes - 1));
     try (InputStream in = conn.getInputStream()) {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       byte[] buf = new byte[8192];
-      int limit = maxBytes > 0 ? maxBytes : MAX_BYTES;
       int n;
       while ((n = in.read(buf)) != -1) {
         out.write(buf, 0, n);
-        if (out.size() >= limit) {
+        if (out.size() >= maxBytes) {
           break;
         }
       }
@@ -175,27 +177,85 @@ public class Mp3DurationReader {
     return null;
   }
 
-  private Long byCountingFrames(byte[] d) {
-    int i = findFirstFrame(d);
-    if (i < 0) {
-      return null;
-    }
-    int samplesPerFrame = samplesPerFrame(d, i);
-    int sampleRate = sampleRate(d, i);
-    long frames = 0;
-    while (i < d.length - 4) {
-      if (isFrameHeader(d, i)) {
+  /**
+   * Walks the whole file frame by frame, reading it as a stream so a 10 MB track costs a 8 KB
+   * buffer rather than 10 MB of heap - several of these can run at once.
+   *
+   * @param audioStart offset of the first audio byte, i.e. past any ID3v2 tag, whose picture frames
+   *                   would otherwise be mistaken for audio
+   */
+  private Long byCountingFrames(String url, int audioStart) throws IOException {
+    HttpURLConnection conn = open(url);
+    try (InputStream in = new BufferedInputStream(conn.getInputStream(), 64 * 1024)) {
+      if (skipFully(in, audioStart) < audioStart) {
+        return null;
+      }
+
+      byte[] window = new byte[4];
+      int filled = 0;
+      long frames = 0;
+      long read = audioStart;
+      int samplesPerFrame = 0;
+      int sampleRate = 0;
+
+      while (read < MAX_BYTES) {
+        while (filled < window.length) {
+          int b = in.read();
+          if (b < 0) {
+            return frames == 0 ? null : toMillis(frames, samplesPerFrame, sampleRate);
+          }
+          window[filled++] = (byte) b;
+          read++;
+        }
+
+        if (!isFrameHeader(window, 0)) {
+          // resync past padding or a damaged frame, one byte at a time - the sync word may start
+          // anywhere inside the window we already hold
+          window[0] = window[1];
+          window[1] = window[2];
+          window[2] = window[3];
+          filled = 3;
+          continue;
+        }
+
+        if (frames == 0) {
+          samplesPerFrame = samplesPerFrame(window, 0);
+          sampleRate = sampleRate(window, 0);
+        }
         frames++;
-        int len = frameLength(d, i);
-        if (len <= 4) {
+
+        int length = frameLength(window, 0);
+        if (length <= window.length) {
           break;
         }
-        i += len;
-      } else {
-        i++; // resync past padding or a damaged frame
+        long body = length - window.length;
+        if (skipFully(in, body) < body) {
+          break;
+        }
+        read += body;
+        filled = 0;
       }
+
+      return frames == 0 ? null : toMillis(frames, samplesPerFrame, sampleRate);
+    } finally {
+      conn.disconnect();
     }
-    return frames == 0 ? null : toMillis(frames, samplesPerFrame, sampleRate);
+  }
+
+  /** {@link InputStream#skip} is allowed to stop short of what was asked; this one does not. */
+  private long skipFully(InputStream in, long count) throws IOException {
+    long done = 0;
+    while (done < count) {
+      long skipped = in.skip(count - done);
+      if (skipped <= 0) {
+        if (in.read() < 0) {
+          return done;
+        }
+        skipped = 1;
+      }
+      done += skipped;
+    }
+    return done;
   }
 
   private Long toMillis(long frames, int samplesPerFrame, int sampleRate) {
