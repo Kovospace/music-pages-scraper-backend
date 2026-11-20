@@ -1,0 +1,8 @@
+# This host is a REST API. The landing page and the API docs may be indexed;
+# the JSON endpoints themselves are not pages and only produce crawl errors.
+User-agent: *
+Allow: /$
+Allow: /swagger-ui
+Disallow: /v1/
+Disallow: /v2/
+Disallow: /v3/
