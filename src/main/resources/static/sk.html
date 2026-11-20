@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MusicPagesScraper API – REST API na sťahovanie dát z Bandzone.cz a FreeTeknoMusic.org</title>
+  <meta name="description" content="MusicPagesScraper je verejné REST API od Mateja Kováča, ktoré vyhľadáva kapely a ich profily so skladbami na Bandzone.cz a FreeTeknoMusic.org a vracia ich ako JSON. Poháňa Android aplikáciu Bandzone player unofficial." />
+  <meta name="author" content="Matej Kováč" />
+  <meta name="theme-color" content="#ffcc00" />
+  <link rel="canonical" href="https://music-pages-scraper.matejkovac.sk/sk.html" />
+  <link rel="alternate" hreflang="en" href="https://music-pages-scraper.matejkovac.sk/" />
+  <link rel="alternate" hreflang="sk" href="https://music-pages-scraper.matejkovac.sk/sk.html" />
+  <link rel="alternate" hreflang="cs" href="https://music-pages-scraper.matejkovac.sk/cs.html" />
+  <link rel="alternate" hreflang="x-default" href="https://music-pages-scraper.matejkovac.sk/" />
+  <link rel="stylesheet" href="/style.css" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="music-pages-scraper.matejkovac.sk" />
+  <meta property="og:url" content="https://music-pages-scraper.matejkovac.sk/sk.html" />
+  <meta property="og:title" content="MusicPagesScraper API" />
+  <meta property="og:description" content="Verejné REST API, ktoré získava kapely a ich skladby z Bandzone.cz a FreeTeknoMusic.org. Backend Android aplikácie Bandzone player unofficial." />
+  <meta property="og:locale" content="sk_SK" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:locale:alternate" content="cs_CZ" />
+</head>
+<body>
+  <main>
+    <div class="top">
+      <p class="eyebrow">REST API · nie je to webstránka</p>
+      <ul class="lang" aria-label="Jazyk">
+        <li><a href="/" data-lang="en" hreflang="en" lang="en" title="English">EN</a></li>
+        <li><a href="/sk.html" data-lang="sk" hreflang="sk" lang="sk" aria-current="page">SK</a></li>
+        <li><a href="/cs.html" data-lang="cs" hreflang="cs" lang="cs" title="Česky">CZ</a></li>
+      </ul>
+    </div>
+
+    <h1>MusicPagesScraper API</h1>
+    <p class="lead">
+      Dostali ste sa na backendový server, nie na webstránku. Je to verejné REST API, ktoré na
+      hudobných portáloch vyhľadáva kapely, otvára ich profily so skladbami a vracia ich ako JSON
+      pre aplikácie.
+    </p>
+
+    <section>
+      <h2>Čo to robí</h2>
+      <p>
+        Hudobné portály nižšie nemajú vlastné API. Tento server číta ich stránky, vyberá z nich
+        kapely, profily a skladby a výsledky si na istý čas ukladá do databázy, takže na opakované
+        otázky odpovedá rýchlo bez toho, aby pôvodný web načítaval znova.
+      </p>
+      <ul class="platforms">
+        <li><a href="https://bandzone.cz/" rel="noopener">Bandzone.cz</a> – garážové a undergroundové kapely z Česka a Slovenska, väčšinou punk, rock a metal.</li>
+        <li><a href="https://www.freeteknomusic.org/" rel="noopener">FreeTeknoMusic.org</a> – tekno, tribecore, drum &amp; bass a hardcore techno zo soundsystémovej a DIY scény.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Vyskúšajte to</h2>
+      <p>
+        Každý endpoint je obyčajný <code>GET</code> a odpovedá v JSON-e, napríklad
+        <code>/v1/platforms</code> alebo <code>/v1/bandzone/bands?q=punk</code>.
+        Všetky endpointy, parametre a formáty odpovedí sú interaktívne zdokumentované (v angličtine)
+        a testovacie požiadavky môžete posielať priamo z prehliadača:
+      </p>
+      <p><a class="cta" href="/swagger-ui.html">Otvoriť dokumentáciu API (Swagger UI)</a></p>
+      <p>Strojovo čitateľná OpenAPI špecifikácia: <a href="/v3/api-docs">JSON</a> · <a href="/v3/api-docs.yaml">YAML</a></p>
+    </section>
+
+    <section>
+      <h2>Čo ho používa</h2>
+      <ul class="links">
+        <li>
+          <a href="https://kovo.space/projekty/bandzone-player-unofficial">Bandzone player unofficial</a>
+          <span>Android aplikácia na prehliadanie a počúvanie kapiel z Bandzone.cz, taký Spotify pre československé garážovky. Toto API je jej backend.
+          Zdrojový kód na <a href="https://github.com/K0V0/BandzoneAndroidUnofficial" rel="noopener">GitHube</a>.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Viac o projekte</h2>
+      <ul class="links">
+        <li>
+          <a href="https://kovo.space/projekty/music-pages-scraper">Stránka projektu na kovo.space</a>
+          <span>Prečo vznikol, ako sa vyvíjal a z čoho sa skladá.</span>
+        </li>
+        <li>
+          <a href="https://github.com/Kovospace/music-pages-scraper-backend" rel="noopener">Zdrojový kód na GitHube</a>
+          <span>Java a Spring Boot, open source.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Kto to urobil</h2>
+      <ul class="links">
+        <li>
+          <a href="https://kovo.space/">Matej Kováč – kovo.space</a>
+          <span>Osobný web, portfólio a blog autora, Java backend vývojára a DevOps inžiniera.</span>
+        </li>
+        <li>
+          <a href="https://github.com/K0V0" rel="noopener">github.com/K0V0</a>
+          <span>Ďalšie projekty autora.</span>
+        </li>
+      </ul>
+    </section>
+
+    <footer>music-pages-scraper.matejkovac.sk · nie je nijako prepojené s Bandzone.cz ani FreeTeknoMusic.org</footer>
+  </main>
+  <script src="/lang.js"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MusicPagesScraper API – scraping REST API for Bandzone.cz and FreeTeknoMusic.org</title>
+  <meta name="description" content="MusicPagesScraper is a public REST API by Matej Kováč that searches bands and band profiles with tracks on Bandzone.cz and FreeTeknoMusic.org and returns them as JSON. It powers the Bandzone player unofficial Android app." />
+  <meta name="author" content="Matej Kováč" />
+  <meta name="theme-color" content="#ffcc00" />
+  <link rel="canonical" href="https://music-pages-scraper.matejkovac.sk/" />
+  <link rel="alternate" hreflang="en" href="https://music-pages-scraper.matejkovac.sk/" />
+  <link rel="alternate" hreflang="sk" href="https://music-pages-scraper.matejkovac.sk/sk.html" />
+  <link rel="alternate" hreflang="cs" href="https://music-pages-scraper.matejkovac.sk/cs.html" />
+  <link rel="alternate" hreflang="x-default" href="https://music-pages-scraper.matejkovac.sk/" />
+  <link rel="stylesheet" href="/style.css" />
+
+  <script>
+    // Slovak and Czech browsers land on their own page, unless the visitor picked a language before.
+    try {
+      if (!localStorage.getItem('lang')) {
+        var l = (navigator.language || '').slice(0, 2).toLowerCase();
+        if (l === 'sk') location.replace('/sk.html');
+        else if (l === 'cs') location.replace('/cs.html');
+      }
+    } catch (e) { /* storage blocked: stay on English */ }
+  </script>
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="music-pages-scraper.matejkovac.sk" />
+  <meta property="og:url" content="https://music-pages-scraper.matejkovac.sk/" />
+  <meta property="og:title" content="MusicPagesScraper API" />
+  <meta property="og:description" content="A public REST API that scrapes bands and their tracks from Bandzone.cz and FreeTeknoMusic.org. Backend of the Bandzone player unofficial Android app." />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="sk_SK" />
+  <meta property="og:locale:alternate" content="cs_CZ" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebAPI",
+      "name": "MusicPagesScraper API",
+      "url": "https://music-pages-scraper.matejkovac.sk/",
+      "description": "REST API that searches bands and band profiles with tracks on Bandzone.cz and FreeTeknoMusic.org and returns them as JSON, caching results in a database.",
+      "documentation": "https://music-pages-scraper.matejkovac.sk/swagger-ui.html",
+      "provider": { "@id": "https://kovo.space/#person" },
+      "author": {
+        "@type": "Person",
+        "@id": "https://kovo.space/#person",
+        "name": "Matej Kováč",
+        "url": "https://kovo.space/",
+        "sameAs": ["https://matejkovac.sk/", "https://github.com/K0V0"]
+      }
+    }
+  </script>
+</head>
+<body>
+  <main>
+    <div class="top">
+      <p class="eyebrow">REST API · no website here</p>
+      <ul class="lang" aria-label="Language">
+        <li><a href="/" data-lang="en" hreflang="en" lang="en" aria-current="page">EN</a></li>
+        <li><a href="/sk.html" data-lang="sk" hreflang="sk" lang="sk" title="Slovensky">SK</a></li>
+        <li><a href="/cs.html" data-lang="cs" hreflang="cs" lang="cs" title="Česky">CZ</a></li>
+      </ul>
+    </div>
+
+    <h1>MusicPagesScraper API</h1>
+    <p class="lead">
+      You have reached a backend server, not a website. It is a public REST API that searches
+      bands and opens band profiles with their tracks on music sites, and hands them back as JSON
+      for apps to use.
+    </p>
+
+    <section>
+      <h2>What it does</h2>
+      <p>
+        The music sites below have no API of their own. This server reads their pages, extracts
+        the bands, profiles and tracks, and caches the results in a database for a while, so
+        repeated questions are answered fast without loading the original site again.
+      </p>
+      <ul class="platforms">
+        <li><a href="https://bandzone.cz/" rel="noopener">Bandzone.cz</a> – garage and underground bands from Czechia and Slovakia, mostly punk, rock and metal.</li>
+        <li><a href="https://www.freeteknomusic.org/" rel="noopener">FreeTeknoMusic.org</a> – tekno, tribecore, drum &amp; bass and hardcore techno from the soundsystem and DIY scene.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Try it</h2>
+      <p>
+        Every endpoint is a plain <code>GET</code> answering in JSON, for example
+        <code>/v1/platforms</code> or <code>/v1/bandzone/bands?q=punk</code>.
+        All endpoints, parameters and response formats are documented interactively, and you
+        can send test requests straight from the browser:
+      </p>
+      <p><a class="cta" href="/swagger-ui.html">Open the API documentation (Swagger UI)</a></p>
+      <p>Machine-readable OpenAPI spec: <a href="/v3/api-docs">JSON</a> · <a href="/v3/api-docs.yaml">YAML</a></p>
+    </section>
+
+    <section>
+      <h2>What uses it</h2>
+      <ul class="links">
+        <li>
+          <a href="https://kovo.space/en/projects/bandzone-player-unofficial">Bandzone player unofficial</a>
+          <span>An Android app for browsing and playing Bandzone.cz bands, a kind of Spotify for Czechoslovak garage bands. This API is its backend.
+          Source code on <a href="https://github.com/K0V0/BandzoneAndroidUnofficial" rel="noopener">GitHub</a>.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>More about the project</h2>
+      <ul class="links">
+        <li>
+          <a href="https://kovo.space/en/projects/music-pages-scraper">Project page on kovo.space</a>
+          <span>Why it was built, how it evolved and what it is made of.</span>
+        </li>
+        <li>
+          <a href="https://github.com/Kovospace/music-pages-scraper-backend" rel="noopener">Source code on GitHub</a>
+          <span>Java and Spring Boot, open source.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Who made it</h2>
+      <ul class="links">
+        <li>
+          <a href="https://kovo.space/en">Matej Kováč – kovo.space</a>
+          <span>Personal web, portfolio and blog of the author, a Java backend developer and DevOps engineer.</span>
+        </li>
+        <li>
+          <a href="https://github.com/K0V0" rel="noopener">github.com/K0V0</a>
+          <span>Other projects by the author.</span>
+        </li>
+      </ul>
+    </section>
+
+    <footer>music-pages-scraper.matejkovac.sk · not affiliated with Bandzone.cz or FreeTeknoMusic.org</footer>
+  </main>
+  <script src="/lang.js"></script>
+</body>
+</html>

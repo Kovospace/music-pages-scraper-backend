@@ -70,3 +70,4 @@ extra ones of their own (bandzone for instance adds `imageUrl`, `genre` and `cit
 | 18.aug.2026 | Swagger UI, api version moved into the path prefix, compatibility annotation, claude.md, AI agents |
 | 19.aug.2026 | v2 band endpoint sending track durations - neither the page nor its player publishes them, so they are read out of the mp3 itself and cached |
 | 19.aug.2026 | v2 endpoint for one track's duration, read while the request waits and stealing the track off the background queue - the android player needs it before the file has streamed to its end; mp3 frames are now counted straight off the stream, so a track is never held in memory whole |
+| 20.nov.2026 | landing page (EN, SK, CZ) on the root address telling a lost visitor what this host is, robots.txt keeping crawlers off the JSON endpoints |
